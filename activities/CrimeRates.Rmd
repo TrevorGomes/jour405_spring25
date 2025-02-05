@@ -6,29 +6,51 @@ Follow along with the demo to learn how to calculate crime rates using R and the
 
 ### Task 1: Load the tidyverse and install and load janitor
 
+```{r}
+library(tidyverse)
+```
+
+```{r}
+library(janitor)
+```
 
 
 ### Task 2: Load the crime dataset from https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_annual_crime.csv
 
+```{r}
+pg_crime <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_annual_crime.csv")
+```
 
 
 ### Task 3: Use janitor to clean up the column names
 
+```{r}
+clean_names(pg_crime)
+```
 
 
 ### Task 4: Calculate the total crime rate for each year (picking our unit!)
 
-
+```{r}
+total_pg_crime <- pg_crime %>% mutate(crime_rate = (`GRAND TOTAL`/`POPULATION`)*100000)
+```
 
 ### Task 5: Calculate the violent and property crime rates for each year (same unit)
 
+```{r}
+violent_crime <- total_pg_crime %>% mutate(violent_crime_rate = (`VIOLENT CRIME TOTAL`/`POPULATION`)*100000)
+```
+
+```{r}
+property_crime <- violent_crime %>% mutate(property_crime_rate = (`PROPERTY CRIME TOTAL`/`POPULATION`)*100000)
+```
 
 
 ### Task 6: Describe our results
 
 Write a few sentences about what you found in the data. What years had the highest crime rates? What years had the lowest crime rates? Does the pattern match your expectations?
 
-
+The primary trend I noticed is that crime rates, both violent and property have drastically decreased over the decades. Crime rate began to sharply decline especially in the 2010s. The late '70s to early '80s and the early to mid '90s had the highest crime rates. The lowest crime rates were in the early and mid 2010s. This pattern did not match my expectation, as I expected crime rates to have either increased recently or stayed largely the same throughout the years.
 
 
 When you are done, save your work, switch to GitHub Desktop, then add, commit and push your changes to GitHub and submit the URL of the notebook in ELMS.
