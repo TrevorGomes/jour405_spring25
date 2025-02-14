@@ -68,6 +68,8 @@ Save this notebook, then commit it to your local repository. Push the changes to
 md_cities_percentiles <- md_cities_rates |> mutate(percentile = ntile(violent_rate_2020, 100))
 ```
 
+Ten cities are above the 90th percentile in 2020 violent crime rate.
+
 ```{r}
 md_cities_percentiles |> summarize(IQR = IQR(violent_rate_2020))
 ```
