@@ -18,7 +18,7 @@ Then you'll load the data from the web. The URL for the data is: https://raw.git
 ### Task 2: Load the Data
 
 ```{r}
-md_cities <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_cities_crime_2019_2020.csv")
+md_cities <- read.csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_cities_crime_2019_2020.csv")
 ```
 ### Task 3: Calculating Rates
 
@@ -61,3 +61,15 @@ Ocean City - one of Maryland's most popular vacation destinations - had 103 prop
 ### Task 9: Save Your Work and Put it on GitHub
 
 Save this notebook, then commit it to your local repository. Push the changes to your GitHub repository and submit the URL for this file in ELMS.
+
+### Task 10: Percentiles
+
+```{r}
+md_cities_percentiles <- md_cities_rates |> mutate(percentile = ntile(violent_rate_2020, 100))
+```
+
+```{r}
+md_cities_percentiles |> summarize(IQR = IQR(violent_rate_2020))
+```
+
+This data may slightly change my story because Ocean City is in the 100th percentile of violent crime rate in 2020. My angle was about the property crime rate in Ocean City, but this data would likely make me cover both violent and property crime rate because the city being in the 100th percentile is certainly noteworthy.
