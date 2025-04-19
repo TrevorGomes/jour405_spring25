@@ -1,0 +1,19 @@
+```{r}
+library(readr)
+data <- read_csv("GitHub/jour405_spring25/project/data.csv")
+View(data)
+```
+
+Notes:
+  - This dataset contains over 160,000 songs released from 1921-2020 that were retrieved from the Spotify Web API
+  - I downloaded this data as a CSV from Kaggle (https://www.kaggle.com/datasets/yamaerenay/spotify-dataset-1921-2020-160k-tracks?select=data.csv)
+  - This dataset is an older, smaller version - there is an updated version with over 600,000 songs - but for the sake of working with a dataset under 100 MB, I chose to download this one
+  - I'd also say 160,000 songs is a sufficient number for the purpose of my research
+  - Columns of data include valence (positivity of the song's subject matter), accousticness (how accoustic a track is), danceability, energy, instrumentalness, liveness, loudness, etc.
+  - Though the only columns that are applicable to my hypotheses are year and duration
+  - The duration is unforunately in miliseconds, which is a bit inconvenient, but there may be a way to convert them into minutes + seconds or seconds (which I would likely need help with)
+  - The dataset including songs from as long ago as 1921 is beneficial because it will allow me to recognize statistical trends over a larger period of time
+  - The quantity of songs also makes the population larger
+  - My original hypothesis regarded song lengths since 2019, though I will probably have to measure change in song length from a few years before that because this dataset only includes songs as recent as 2020
+  - One year's worth of songs would probably not be enough for the purposes of my hypotheses
+  _ I would likely change my hypothesis to 2010, just to measure how song lengths have changed before and after the rise of technology (and the modern era)
