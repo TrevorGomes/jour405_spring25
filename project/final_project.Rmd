@@ -1,3 +1,12 @@
+List of possible statistical tests:
+
+  - I could calculate the central tendencies of the dataset and z-scores for every decade or year from 1921=2020 based on song duration or other qualities included in the dataset. This would allow me to compare which decade/year had the longest songs and how song duration has changed by observing how z-scores have changed
+  - Visualization, such as a line graph, would be helpful for this analysis because it would simply and cleanly display how qualities of songs, such as duration, have changed over time
+  - I could calculate percentiles to determine what years place where as far as percentiles (ex: if several years in the 2010s placed in high percentiles, this would support my alternate hypothesis)
+  - If I wnated to take large-scale, long-term approach to observing if songs have decreased in length over the decades, I could create a scatterplot measuring the correlation between the passing of time and shortening song duration
+  - Based on my null hypothesis and alternate hypothesis, I would conduct a hypothesis test, and use the p-value and confidence interval to draw a conclusion about my data
+  - I could perform an ANOVA test to determine if the difference in song length between decades or years is statistically significant, based on the f-value
+
 ```{r}
 library(readr)
 data <- read_csv("GitHub/jour405_spring25/project/data.csv")
