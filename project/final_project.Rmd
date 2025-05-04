@@ -9,6 +9,9 @@ List of possible statistical tests:
 
 ```{r}
 library(readr)
+library(tidyverse)
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen = 999)
 data <- read_csv("GitHub/jour405_spring25/project/data.csv")
 View(data)
 ```
@@ -26,3 +29,44 @@ Notes:
   - My original hypothesis regarded song lengths since 2019, though I will probably have to measure change in song length from a few years before that because this dataset only includes songs as recent as 2020
   - One year's worth of songs would probably not be enough for the purposes of my hypotheses
   _ I would likely change my hypothesis to 2010, just to measure how song lengths have changed before and after the rise of technology (and the modern era)
+
+
+```{r}
+summary(data)
+```
+
+```{r}
+data %>% mutate(
+  mean_duration = mean(duration_ms),
+  median_duration = median(duration_ms),
+  sd_duration = sd(duration_ms),
+  z_score = (duration_ms - mean_duration) / sd_duration)
+```
+
+```{r}
+data |>
+  ggplot(aes(x = `year`, y = `duration_ms`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(x = "year", y = "duration_ms", title = "Scatterplot of Song Length over the Years")
+```
+
+```{r}
+model <- lm(`duration_ms` ~ `year`, data = data)
+
+summary(model)
+```
+
+```{r}
+anova_result <- aov(year ~ duration_ms, data = data)
+summary(anova_result)
+```
+
+Notes on results of tests so far:
+  - The ANOVA and linear regression analysis are the two most telling tests
+  - The linear regression model shows a slightly positive relationship between length of song and years, indicating that songs from this dataset have gradually gotten longer as time has gone on, which would support the null hypothesis I proposed
+  - An analysis of the model yielded a small p-value (far below 0.05), indicating that results are statistically significant
+  - The ANOVA test produced a massive f-value, showing a significantly larger difference in song duration between years than within years (if I conducted it and interpreted the results correctly)
+  - The next steps would be to conduct a hypothesis test to more concretely determine if I should or should not reject my null hypothesis
+  - Another next step would be to perform a chi-square test to measure expected song duration based on the year compared to actual song lengths
+  - Finally, when I have my data, I would like to convert milliseconds to minutes and seconds or seconds to make the data more palatable and understandable
