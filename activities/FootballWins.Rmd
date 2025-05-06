@@ -1,0 +1,88 @@
+---
+title: "Multiple Regression Analysis in R"
+---
+
+# Introduction
+
+Multiple regression analysis is a statistical method used to understand the relationship between one dependent variable and two or more independent variables. This analysis is particularly useful in journalism for exploring complex relationships, such as how different factors collectively impact outcomes like election results, economic indicators, or sports performances. By understanding these relationships, journalists can provide deeper insights and more accurate predictions.
+
+```{r setup}
+library(tidyverse)
+#install.packages('corrplot')
+library(corrplot)
+```
+
+## Data Import
+
+The first step in our analysis is to load the data. Here we read the data from a CSV file, which contains various statistics for NFL teams from the 2019 season. This dataset will be used to build our model.
+
+```{r}
+teams <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/nfl_2019.csv")
+```
+
+## Model Building
+
+Next, we construct a linear model to analyze how different factors like `Yards Gained`, `Takeaways`, and `Points Scored` influence the number of wins. This model helps us quantify the relationships and assess which factors are significant predictors of success.
+
+```{r}
+model <- lm(Wins ~ `Yards Gained` + Takeaways + `Points Scored`, data = teams)
+summary(model)
+```
+
+### Residuals
+
+The residuals of a model are the differences between observed values and the values predicted by the model. For your model:
+
+*   **Min and Max** values indicate the range of residuals. A maximum of 4.1361 and a minimum of -4.3780 suggest that there might be some substantial errors in predictions for some cases, but generally, the errors are relatively evenly distributed around zero.
+*   **Median** close to zero (-0.0604) indicates that the model is generally centered around the actual data points, but still, some deviations exist.
+
+### Coefficients
+
+The coefficients tell us the estimated effect of each independent variable on the dependent variable:
+
+*   **Yards Gained**: The coefficient is -0.001329. This suggests a very small negative impact of yards gained on wins, but this effect is not statistically significant (p = 0.34332), implying that as yards gained increase, the number of wins slightly decreases, which is counterintuitive and likely indicates no real effect or that the model isn't capturing the complexities.
+*   **Takeaways**: The coefficient is 0.150593, suggesting that each additional takeaway is associated with an increase in wins by about 0.151, which is near the threshold of significance (p = 0.07928). This suggests a potentially meaningful, though not conventionally statistically significant, positive effect on wins.
+*   **Points Scored**: The coefficient is 0.038732, which is significant (p = 0.00665). This indicates that each additional point scored is associated with an increase in wins by about 0.039, suggesting a clear and meaningful impact.
+
+### Model Fit (3 points)
+
+*   **Residual Standard Error**: The RSE of 2.072 tells us that the typical prediction by the model deviates from the actual number of wins by about 2.072 wins.
+*   **Multiple R-squared**: 0.6232 indicates that about 62.32% of the variability in wins is explained by the model, which is relatively high, suggesting a good fit.
+*   **Adjusted R-squared**: 0.5828 adjusts the R-squared for the number of predictors and indicates that about 58.28% of the variance is explained by the model after accounting for the number of variables used.
+*   **F-statistic**: The F-statistic of 15.44 with a very low p-value (4.058e-06) suggests the model as a whole is statistically significant.
+
+Is this a useful model, based on what you've seen? Why?
+
+The p-value and adjusted R-squared suggest that the model is useful because these numbers indicated that the results are statistically significant and explain a considerable percentage (~58%) of the variance. Analyzing how takeaways affect number of wins is particularly useful because the takeaway coefficient is quite high relative to the other statistics.
+
+## Correlation Analysis
+
+After building the model, we calculate the correlation matrix for our variables of interest. This matrix helps visualize the strength and direction of the relationships between each pair of variables.
+
+```{r}
+selected_vars <- teams |>  select(`Yards Gained`, Takeaways, `Points Scored`, Wins)
+cor(selected_vars)
+```
+
+## Visualization of Correlation Matrix
+
+Finally, we use a visualization tool to plot the correlation matrix. This graphical representation makes it easier to interpret the correlations at a glance, showing which variables are most closely connected.
+
+```{r}
+corr_matrix <- cor(selected_vars)
+corrplot(corr_matrix, method = "circle")
+```
+
+## Results Interpretation (4 points)
+
+The results from our correlation analysis show the strength of the relationships between the number of wins and factors like yards gained, takeaways, and points scored. High positive correlations indicate strong relationships where increases in one variable are associated with increases in another. Conversely, negative correlations suggest an inverse relationship. By understanding these dynamics, journalists can better explain the factors that contribute to a team's success or failure in a season.
+
+Which of these three factors - Yards Gained, Takeaways and Points Scored - have the most impact on wins? Are there any that do not seem impactful at all?
+
+Points scored has the most impact on wins, with a correlation coefficient of ~0.7078. Yards gained has a coefficient of 0.443, but I believe it is still a valuable stat to consider because 44.3% is still high enough to make a significant difference.
+
+## Using the Model (3 points)
+
+Without using the words "multiple regression model", describe how you could use this model to cover a team or game.
+
+I would use this model for a piece about the importance of a potent offense or takeaways, and how they are conducive to winning. A recent example would be the 2024-25 Washington Commanders, who generated a relatively low amount of turnovers, yet had one of the highest scoring offenses in the league. This resulted in a 12-win season. This model could be used as a frame of reference for how significant Washington's offense was compared to the takeaways they got.
