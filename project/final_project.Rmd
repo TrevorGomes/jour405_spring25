@@ -1,72 +1,161 @@
-List of possible statistical tests:
 
-  - I could calculate the central tendencies of the dataset and z-scores for every decade or year from 1921=2020 based on song duration or other qualities included in the dataset. This would allow me to compare which decade/year had the longest songs and how song duration has changed by observing how z-scores have changed
-  - Visualization, such as a line graph, would be helpful for this analysis because it would simply and cleanly display how qualities of songs, such as duration, have changed over time
-  - I could calculate percentiles to determine what years place where as far as percentiles (ex: if several years in the 2010s placed in high percentiles, this would support my alternate hypothesis)
-  - If I wnated to take large-scale, long-term approach to observing if songs have decreased in length over the decades, I could create a scatterplot measuring the correlation between the passing of time and shortening song duration
-  - Based on my null hypothesis and alternate hypothesis, I would conduct a hypothesis test, and use the p-value and confidence interval to draw a conclusion about my data
-  - I could perform an ANOVA test to determine if the difference in song length between decades or years is statistically significant, based on the f-value
+#Introduction/laying out what I'm investigating#  
+
+In this project, I aim to determine if the duration of songs has significantly changed over time. First, I will analyze a dataset of roughly 160,000 songs retrieved from the Spotify API. The release date of these tracks ranges from 1921 to 2020. 
+
+Then, I will narrow the dataset down to a specific decade, analyzing songs released from 2010 to 2020. Ultimately, my goal is to determine if the rise in prominence of social media, coinciding with a shortened attention span, has caused artists to decrease the duration of their songs. 
+
+My null hypothesis is that there was no considerable change in song length during the 2010s. My alternate hypothesis is that there was considerable change in song length during the 2010s.
+  
+# Loading the tidyverse and my dataset
 
 ```{r}
-library(readr)
 library(tidyverse)
 knitr::opts_chunk$set(echo = TRUE)
 options(scipen = 999)
-data <- read_csv("GitHub/jour405_spring25/project/data.csv")
+library(readr)
+data <- read_csv("https://raw.githubusercontent.com/TrevorGomes/jour405_spring25/refs/heads/main/project/data.csv")
 View(data)
 ```
 
-Notes:
-  - This dataset contains over 160,000 songs released from 1921-2020 that were retrieved from the Spotify Web API
-  - I downloaded this data as a CSV from Kaggle (https://www.kaggle.com/datasets/yamaerenay/spotify-dataset-1921-2020-160k-tracks?select=data.csv)
-  - This dataset is an older, smaller version - there is an updated version with over 600,000 songs - but for the sake of working with a dataset under 100 MB, I chose to download this one
-  - I'd also say 160,000 songs is a sufficient number for the purpose of my research
-  - Columns of data include valence (positivity of the song's subject matter), accousticness (how accoustic a track is), danceability, energy, instrumentalness, liveness, loudness, etc.
-  - Though the only columns that are applicable to my hypotheses are year and duration
-  - The duration is unforunately in miliseconds, which is a bit inconvenient, but there may be a way to convert them into minutes + seconds or seconds (which I would likely need help with)
-  - The dataset including songs from as long ago as 1921 is beneficial because it will allow me to recognize statistical trends over a larger period of time
-  - The quantity of songs also makes the population larger
-  - My original hypothesis regarded song lengths since 2019, though I will probably have to measure change in song length from a few years before that because this dataset only includes songs as recent as 2020
-  - One year's worth of songs would probably not be enough for the purposes of my hypotheses
-  _ I would likely change my hypothesis to 2010, just to measure how song lengths have changed before and after the rise of technology (and the modern era)
-
+# Here I convert milliseconds to seconds simply by dividing the duration_ms column by 1000. This makes the data more pallatable and easier to grasp.
 
 ```{r}
-summary(data)
+data_w_seconds <- data %>% mutate(
+  duration_sec = duration_ms/1000)
 ```
 
-```{r}
-data %>% mutate(
-  mean_duration = mean(duration_ms),
-  median_duration = median(duration_ms),
-  sd_duration = sd(duration_ms),
-  z_score = (duration_ms - mean_duration) / sd_duration)
-```
+# Evaluation: This created a new dataset called "data_w_seconds" featuring a new column (duration_sec)
+
+
+# In this step, I'm summarizing the data to gather descriptive statistics and central tendencies. This data allows me to calculate z-scores in the next step.
 
 ```{r}
-data |>
-  ggplot(aes(x = `year`, y = `duration_ms`)) +
+summary(data_w_seconds)
+```
+# Evaluation: The most significant statistic to my hypotheses is the duration of the songs. As seen above, the songs vary quite widely in duration, evidenced by the disparity between the median and mean, and minimum and maximum.
+
+
+# In this block of code, I'm creating another dataset with four additional columns: the mean song duration, median song duration, the standard deviation of the song durations (all of which are the same for every entry in the entire dataset) and z-scores for each individual song. The z-score is calculated by subtracting the mean song duration of the whole dataset from an individual song's duration, then dividing the result by the standard deviation of song durations.
+
+```{r}
+data_w_z_scores <- data_w_seconds %>% mutate(
+  mean_duration = mean(duration_sec),
+  median_duration = median(duration_sec),
+  sd_duration = sd(duration_sec),
+  z_score = (duration_sec - mean_duration) / sd_duration)
+```
+
+# Evaluation: The z-scores for individual songs range widely, extending to over 40, meaning that song's length is over 40 standard deviations above the mean song duration.
+
+
+# In this step, I'm creating a scatterplot that visualizes the relationship between song length and year. Year is assigned to the x-axis and song duration to the y-axis. The red line is the "line of best fit," that represents the general trend of the data. This graph gives a clearer visual representation of how song length has changed form 1921, the earliest date in the dataset, to 2020, the most recent data in the dataset. 
+
+```{r}
+data_w_z_scores |>
+  ggplot(aes(x = year, y = duration_sec)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE, color = "red") +
-  labs(x = "year", y = "duration_ms", title = "Scatterplot of Song Length over the Years")
+  labs(x = "year", y = "duration_sec", title = "Scatterplot of Song Length over the Years")
 ```
 
+# Evaluation: Though the massive number of datapoints somewhat obscures the direction of the scatterplot, the line of best fit indicates a slight increase in song length from 1921 to 2020. Though this indicates a change, the increase is gradual, meaning, on the surface, this data would suggest my null hypothesis more so than my alternate hypothesis.
+
+
+# In this step, I'm creating a linear model and conducting an analysis to determine how much effect the year has on the duration of a song. This analysis yields coefficients which indicate how much year (my independent variable) affects song duration (my dependent variable). The p-value and f-statistic indicate how statistically significant the model is, and the adjusted R-squared value represents the percentage of variance in the dependent variable that the independent variable is responsible for.
+
 ```{r}
-model <- lm(`duration_ms` ~ `year`, data = data)
+model <- lm(`duration_sec` ~ `year`, data = data_w_z_scores)
+
+summary(model)
+```
+# Evaluation: While the p-value and f-statistic show that the model is statistically significant, meaning the findings are unlikely to be caused by pure chance, the adjusted R-squared value and year coefficient are quite low. A ~ .006 adjusted R-squared value indicates that less than 1% of the variance in song duration can be ascribed to the year the song was released.
+
+
+# In this step, I'm creating a line graph as another way to visualize the data and show the trend of song duration over the years.
+
+```{r}
+data_w_z_scores %>%
+  ggplot(aes(x = year, y = duration_sec)) +
+  geom_line(linetype = "dashed") +
+  geom_smooth(method = "lm")
+  labs(x = "year", y = "duration_sec", title = "Line Graph of Song Length over the Years")
+
+```
+
+# Evaluation: This line grpah reflects similiar findings to the scatterplot. As indicated by the blue line, song duration gradually increased from 1921 to 2020.
+
+
+# Since there appears to be no significant change in song duration from 1921 to 2020, I will narrow the scope of my analysis to the 2010s. I will create a new dataset only including songs released from 2010 to 2020. This decade will be more telling for my hypotheses - if social media has considerably affected song length - and could exhibit more significant changes than the entire dataset. 
+
+```{r}
+data_2010s <- data_w_z_scores %>% filter(year == 2010 | year == 2011 | year == 2012 | year == 2013 | year == 2014 | year == 2015 | year == 2016 | year == 2017 | year == 2018 | year == 2019 | year == 2020)
+```
+
+
+# As I did for the dataset ranging from 1921 to 2020, I'm creating a scatterplot with a line of best fit to visualize any changes in average song length during the 2010s. The scatterplot is entirely the same, it now applies to a more specific range of dates.
+
+```{r}
+data_2010s |>
+  ggplot(aes(x = year, y = duration_sec)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(x = "year", y = "duration_sec", title = "Scatterplot of Song Length over the Years")
+```
+
+# Evaluation: This scatterplot shows a more pronounced negative relationship between song duration and year of release, which would lend itself more to my alternate hypothesis. Still, further analysis needs to be conducted to quantify the findings and determine if I can reject my null hypothesis.
+
+
+# I'm also repeating the linear model analysis that I did for the entire dataset. This will allow me to see if my findings are statistically significant, and if the independent variable (year) has a more profound affect on the dependent variable (song duration) during the 2010s than from 1921 to 2020.
+
+```{r}
+model <- lm(duration_sec ~ year, data = data_2010s)
 
 summary(model)
 ```
 
+# Evaluation: The p-value and f-statistic in this rendition of the linear model analysis similarly indicate that the model is statistically significant. Though the adjusted R-squared value and year coefficients are markedly larger, they still don't reflect a considerable relationship between song duration and year. The adjusted R-squared value indicates that year of release is accountable for only roughly 3% of the variance of song length.
+
+
+# As another way to visualize the data, I'm creating a line graph exclusively for the 2010s data, just as I did for the entire dataset.
+
 ```{r}
-anova_result <- aov(year ~ duration_ms, data = data)
-summary(anova_result)
+data_2010s %>%
+  ggplot(aes(x = year, y = duration_sec)) +
+  geom_line(linetype = "dashed") +
+  geom_smooth(method = "lm")
+  labs(x = "year", y = "duration_sec", title = "Line Graph of Song Length during the 2010s")
 ```
 
-Notes on results of tests so far:
-  - The ANOVA and linear regression analysis are the two most telling tests
-  - The linear regression model shows a slightly positive relationship between length of song and years, indicating that songs from this dataset have gradually gotten longer as time has gone on, which would support the null hypothesis I proposed
-  - An analysis of the model yielded a small p-value (far below 0.05), indicating that results are statistically significant
-  - The ANOVA test produced a massive f-value, showing a significantly larger difference in song duration between years than within years (if I conducted it and interpreted the results correctly)
-  - The next steps would be to conduct a hypothesis test to more concretely determine if I should or should not reject my null hypothesis
-  - Another next step would be to perform a chi-square test to measure expected song duration based on the year compared to actual song lengths
-  - Finally, when I have my data, I would like to convert milliseconds to minutes and seconds or seconds to make the data more palatable and understandable
+# Evaluation: The line graph showcases a similar slightly negative relationship between year and song duration.
+
+
+# In this step, I'm determining the correlation coefficient between year and song duration, which quantifies the relationship between the two variables on a scale of 0 to 1 or 0 to -1.
+```{r}
+selected_vars <- data_2010s %>% select(`duration_sec`, `year`)
+cor(selected_vars)
+```
+
+# Evaluation: Year and song duration have a correlation coefficient of -.1895, which is relatively weak, as expected by the gradually sloping line of best fit and low adjusted R-squared value. This coefficient suggests a slight negative relationship between song duration and year, but not strong enough of a relationship to reject my null hypothesis.
+
+
+#This correlation matrix visualizes the correlation ceofficient (relationship) between song duration and year, by plotting the variables in a matrix and representing the strength of their relationship with the size of a circle.
+
+```{r}
+corr_matrix <- cor(selected_vars)
+corrplot(corr_matrix, method = "circle")
+```
+
+# Evaluation: As seen above, the circles at the intersection of "year" and "duration_sec" are quite small and tan, representing a weak negative relationship. The other circles represent a perfectly positive relationship and dwarf the circle showing the correlation between year and song duration.
+
+
+
+#Final story pitch
+
+Through the analyses I've conducted, namely the linear model analyses that support the trends from the visualizations, I failed to find a significant relationship between song duration and year of release. From both the dataset as a whole, 1921 to 2020, and the 2010s decade specifically. The line of best fit appeared to have a low slope, only gradually increasing from 1921 to 2020, and slightly decreasing from 2010 to 2020. This was supported by the small adjusted R-squared values and coefficients for both ranges of data, indicating that year had a negligible effect on song duration.
+
+These findings are significant, however. Much has been made of "TikTok music" and how social media has shortened users' attention spans, and with it, the duration of songs. Some claim that music as a whole is now tailored for social media platforms, and songs have been shortened. Though my analyses in this project suggest that, in a pool of over 160,000 songs over nearly a century, and nearly 22,000 songs released from 2010 to 2020, no such change has occurred.
+
+My story would use these analyses to refute that claim and further examine why the shortening song narrative exists. I could conduct analyses on a newer set of songs, perhaps from 2020 to modern-day 2025 or specifically on songs that have trended on TikTok. An issue I'd likely face when pursuing this story would be gathering a dataset of songs that were popular on TikTok. 
+
+For this story, I would consult someone who has researched recent music to interview them about their thoughts or findings on song duration. I would also reach out to a psychologist or other professional who has expertise on attention spans to ask them about social media's effect. I'd also inquire about how shortened attention span interacts with music, and what songs become popular.
